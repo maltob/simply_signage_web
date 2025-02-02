@@ -2,36 +2,52 @@
 @using SimplySignage.Data
 
 @inject SignInManager<ApplicationUser> SignInManager
-
+    @inject IdentityUserAccessor UserAccessor
+@inject Microsoft.Extensions.Options.IOptions<SignageIdentityOptions> identityOptions
+@{ 
+    var identOptions = identityOptions.Value;
+}
 <ul class="nav nav-pills flex-column">
     <li class="nav-item">
         <NavLink class="nav-link" href="Account/Manage" Match="NavLinkMatch.All">Profile</NavLink>
     </li>
+
+    @if(hasPassword) {
     <li class="nav-item">
         <NavLink class="nav-link" href="Account/Manage/Email">Email</NavLink>
     </li>
+    
     <li class="nav-item">
         <NavLink class="nav-link" href="Account/Manage/ChangePassword">Password</NavLink>
     </li>
+    }
     @if (hasExternalLogins)
     {
         <li class="nav-item">
             <NavLink class="nav-link" href="Account/Manage/ExternalLogins">External logins</NavLink>
         </li>
     }
+    @if(hasPassword) {
     <li class="nav-item">
         <NavLink class="nav-link" href="Account/Manage/TwoFactorAuthentication">Two-factor authentication</NavLink>
     </li>
+    }
     <li class="nav-item">
         <NavLink class="nav-link" href="Account/Manage/PersonalData">Personal data</NavLink>
     </li>
 </ul>
 
 @code {
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
     private bool hasExternalLogins;
-
+    private bool hasPassword;
     protected override async Task OnInitializedAsync()
     {
+        var user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+
+        hasPassword = await SignInManager.UserManager.HasPasswordAsync(user);
         hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+        
     }
 }

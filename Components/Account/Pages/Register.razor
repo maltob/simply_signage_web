@@ -14,14 +14,21 @@
 @inject ILogger<Register> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
+    @inject Microsoft.Extensions.Options.IOptions<SignageIdentityOptions> identityOptions
+@{ 
+    var identOptions = identityOptions.Value;
+}
 
 <PageTitle>Register</PageTitle>
 
 <h1>Register</h1>
 
 <div class="row">
+    @if(identOptions.AllowLocalRegistration) {
     <div class="col-lg-6">
+        
         <StatusMessage Message="@Message" />
+        <p>@identOptions.AllowLocalRegistration</p>
         <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
             <DataAnnotationsValidator />
             <h2>Create a new account.</h2>
@@ -44,10 +51,14 @@
             </div>
             <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
         </EditForm>
+        
     </div>
+    }else{
+            <h5>Local registration is not enabled. Please use Social Providers to register. </h5><br/><br/><br/><br/>
+    }
     <div class="col-lg-4 col-lg-offset-2">
         <section>
-            <h3>Use another service to register.</h3>
+            <h3>Registration Providers</h3>
             <hr />
             <ExternalLoginPicker />
         </section>
@@ -67,7 +78,9 @@
 
     public async Task RegisterUser(EditContext editContext)
     {
-        
+        if(!identityOptions.Value.AllowLocalRegistration) {
+            return;
+        }
         var user = CreateUser();
 
         await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);

@@ -1,4 +1,4 @@
-public class IdentityOptions {
+public class SignageIdentityOptions {
     public const string Identity = "Identity";
 
     public bool AllowLocalRegistration {get; set;} = false;

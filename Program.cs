@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using SimplySignage.Components;
 using SimplySignage.Components.Account;
 using SimplySignage.Data;
@@ -42,6 +43,8 @@ builder.Services.AddAuthentication().AddMicrosoftAccount(microsoftOptions =>
     });
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+
+builder.Services.Configure<SignageIdentityOptions>(builder.Configuration);
 
 var app = builder.Build();
 
